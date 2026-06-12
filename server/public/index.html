@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IR Remote</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>IR Remote</h1>
+    <div id="status">
+      <span id="statusDot" class="dot offline"></span>
+      <span id="statusLabel">Disconnected</span>
+      <span id="statusRssi"></span>
+      <button id="hexLookupBtn" class="btn header-btn" title="Hex Code Lookup">🔍</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="devices"></section>
+
+    <section id="acPanel" class="hidden">
+      <div class="device-card">
+        <div class="card-header" data-device="ac">
+          <h3>Air Conditioner</h3>
+          <span class="collapse-icon">▾</span>
+        </div>
+        <div class="card-body">
+          <div class="ac-controls">
+          <div class="ac-row">
+            <span class="ac-label">Power</span>
+            <button id="acPower" class="toggle-btn off">OFF</button>
+          </div>
+          <div class="ac-row">
+            <span class="ac-label">Mode</span>
+            <div class="ac-mode-grid" id="acMode">
+              <button data-value="0" class="mode-btn">Auto</button>
+              <button data-value="1" class="mode-btn active">Cool</button>
+              <button data-value="2" class="mode-btn">Dry</button>
+              <button data-value="3" class="mode-btn">Heat</button>
+              <button data-value="4" class="mode-btn">Fan</button>
+            </div>
+          </div>
+          <div class="ac-row">
+            <span class="ac-label">Temp</span>
+            <div class="ac-temp-row">
+              <button id="acTempDown" class="icon-btn">−</button>
+              <span id="acTempValue">25°C</span>
+              <button id="acTempUp" class="icon-btn">+</button>
+            </div>
+          </div>
+          <div class="ac-row">
+            <span class="ac-label">Fan</span>
+            <div class="ac-fan-grid" id="acFan">
+              <button data-value="0" class="fan-btn active">Auto</button>
+              <button data-value="1" class="fan-btn">Low</button>
+              <button data-value="2" class="fan-btn">Med</button>
+              <button data-value="3" class="fan-btn">High</button>
+            </div>
+          </div>
+          <div class="ac-row">
+            <span class="ac-label">Options</span>
+            <div class="ac-option-row">
+              <label class="ac-check"><input type="checkbox" id="acTurbo"> Turbo</label>
+              <label class="ac-check"><input type="checkbox" id="acLight"> Light</label>
+              <label class="ac-check"><input type="checkbox" id="acSleep"> Sleep</label>
+            </div>
+          </div>
+          <div class="ac-row">
+            <span class="ac-label">Swing</span>
+            <div class="ac-swing-row">
+              <label class="ac-check"><input type="checkbox" id="acSwingAuto"> Auto</label>
+              <select id="acSwingPos" class="ac-select">
+                <option value="0">Pos 0</option>
+                <option value="1">Pos 1</option>
+                <option value="2">Pos 2</option>
+                <option value="3">Pos 3</option>
+                <option value="4">Pos 4</option>
+                <option value="5">Pos 5</option>
+                <option value="6">Pos 6</option>
+                <option value="7">Pos 7</option>
+                <option value="8">Pos 8</option>
+                <option value="9">Pos 9</option>
+                <option value="10">Pos 10</option>
+              </select>
+            </div>
+          </div>
+          <div class="ac-row">
+            <span class="ac-label">Display</span>
+            <select id="acDispTemp" class="ac-select">
+              <option value="0">Set Temp</option>
+              <option value="1">Inside</option>
+              <option value="2">Outside</option>
+            </select>
+          </div>
+          <div class="ac-actions">
+            <button id="acSendBtn" class="btn primary">Send Command</button>
+            <button id="acScheduleBtn" class="btn">Schedule This State</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    </section>
+
+    <section id="customIr">
+      <h3>Custom IR</h3>
+      <div class="ir-row">
+        <input type="text" id="customIrInput" placeholder="0x1FE807F" spellcheck="false">
+        <select id="customIrProtocol" class="sm-select">
+          <option value="NEC">NEC</option>
+          <option value="SONY">Sony</option>
+          <option value="SAMSUNG">Samsung</option>
+          <option value="LG">LG</option>
+          <option value="RC5">RC5</option>
+          <option value="RC6">RC6</option>
+          <option value="PANASONIC">Panasonic</option>
+          <option value="JVC">JVC</option>
+          <option value="SHARP">Sharp</option>
+          <option value="COOLIX">Coolix</option>
+          <option value="MIDEA">Midea</option>
+          <option value="DENON">Denon</option>
+          <option value="DISH">Dish</option>
+          <option value="PIONEER">Pioneer</option>
+          <option value="MITSUBISHI">Mitsubishi</option>
+          <option value="TECO">Teco</option>
+        </select>
+        <input type="number" id="customIrNbits" class="sm-input" placeholder="Bits" min="0" max="64" title="Optional bit length (0 = protocol default)">
+        <button id="customIrBtn" class="btn" disabled>Send</button>
+      </div>
+    </section>
+
+    <section id="schedules">
+      <div class="section-header">
+        <h3>Schedules</h3>
+        <button id="addScheduleBtn" class="btn primary">+ Add</button>
+      </div>
+      <ul id="scheduleList"></ul>
+      <p id="scheduleEmpty" class="empty-msg">No schedules yet.</p>
+    </section>
+  </main>
+
+  <div id="modalOverlay" class="hidden">
+    <div id="modal">
+      <h3 id="modalTitle">Add Schedule</h3>
+      <form id="scheduleForm">
+        <label>
+          Time
+          <input type="time" id="formTime" required>
+        </label>
+        <label>
+          Days
+          <div id="dayCheckboxes" class="day-row">
+            <label><input type="checkbox" value="0"> Sun</label>
+            <label><input type="checkbox" value="1"> Mon</label>
+            <label><input type="checkbox" value="2"> Tue</label>
+            <label><input type="checkbox" value="3"> Wed</label>
+            <label><input type="checkbox" value="4"> Thu</label>
+            <label><input type="checkbox" value="5"> Fri</label>
+            <label><input type="checkbox" value="6"> Sat</label>
+          </div>
+        </label>
+        <label>
+          Action
+          <select id="formAction" required></select>
+        </label>
+        <div id="formAcStateInfo" class="hidden">
+          <p class="ac-state-summary">With current AC state</p>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="modalCancel" class="btn">Cancel</button>
+          <button type="submit" id="modalSave" class="btn primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="hexModalOverlay" class="hidden">
+    <div id="hexModal">
+      <div class="hex-modal-header">
+        <h3>Hex Code Lookup</h3>
+        <button id="hexModalClose" class="btn">&times;</button>
+      </div>
+      <input type="text" id="hexSearch" placeholder="Search device, command, or hex code..." spellcheck="false">
+      <div id="hexTableWrap">
+        <table id="hexTable">
+          <thead>
+            <tr><th>Device</th><th>Command</th><th>Hex</th><th>Protocol</th><th>Bits</th></tr>
+          </thead>
+          <tbody id="hexTableBody"></tbody>
+        </table>
+      </div>
+      <p id="hexEmpty" class="hidden">No codes found.</p>
+    </div>
+  </div>
+
+<script src="script.js"></script>
+</body>
+</html>

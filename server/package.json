@@ -1,0 +1,14 @@
+{
+  "name": "ir-remote-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "IR Remote Control Server — connects to ESP8266 IR emitter via WebSocket",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "ws": "^8.18.0"
+  }
+}

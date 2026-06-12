@@ -1,0 +1,21 @@
+repos:
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v19.1.7
+    hooks:
+      - id: clang-format
+        name: clang-format (cpp/h)
+        types_or: [c++, c]
+        args: [--style=file]
+      - id: clang-format
+        name: clang-format (ino)
+        types: [text]
+        files: \.ino$
+        args: [--style=file]
+
+  - repo: local
+    hooks:
+      - id: pio-build
+        name: PlatformIO build
+        language: system
+        entry: pio run
+        pass_filenames: false

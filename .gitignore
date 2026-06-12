@@ -1,0 +1,15 @@
+.pio/
+.pioenvs/
+.piolibdeps/
+__pycache__/
+
+# Ignore Visual Studio Code settings
+.vscode/
+
+.lsp/
+
+server/node_modules/
+server/schedules.json
+
+# AI agent instructions — keep local only
+AGENTS.md
