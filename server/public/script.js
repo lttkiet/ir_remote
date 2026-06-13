@@ -388,6 +388,7 @@ scheduleForm.addEventListener('submit', (e) => {
     dayMask,
     actionId: formAction.value,
     actionName: formAction.options[formAction.selectedIndex].text,
+    tzOffset: -new Date().getTimezoneOffset(),
   };
 
   if (formAction.value === 'ac:set_state') {

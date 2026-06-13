@@ -47,10 +47,9 @@ function add(data) {
     actionId: data.actionId,
     actionName: data.actionName,
     active: data.active !== false,
+    tzOffset: data.tzOffset || 0,
   };
-  if (data.acState) {
-    entry.acState = data.acState;
-  }
+  if (data.acState) entry.acState = data.acState;
   schedules.push(entry);
   save();
   if (broadcastFn) broadcastFn(schedules);
@@ -67,21 +66,29 @@ function update(id, data) {
   const idx = schedules.findIndex((s) => s.id === id);
   if (idx === -1) return false;
   Object.assign(schedules[idx], data);
+  if (data.tzOffset !== undefined) schedules[idx].tzOffset = data.tzOffset;
   save();
   if (broadcastFn) broadcastFn(schedules);
   return true;
 }
 
 function check() {
-  const now = new Date();
-  const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-  const dayBit = 1 << now.getDay();
-  const dateKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+  const now = Date.now();
 
   for (const s of schedules) {
     if (!s.active) continue;
+
+    const tzMs = (s.tzOffset || 0) * 60000;
+    const localNow = new Date(now + tzMs);
+    const timeStr = `${String(localNow.getHours()).padStart(2, '0')}:${String(localNow.getMinutes()).padStart(2, '0')}`;
+    const dayBit = 1 << localNow.getDay();
+    const dateKey = `${localNow.getFullYear()}-${localNow.getMonth()}-${localNow.getDate()}`;
+
     if ((s.dayMask & dayBit) === 0) continue;
-    if (s.time !== timeStr) continue;
+
+    const sTime = s.time.length >= 5 ? s.time.substring(0, 5) : s.time;
+    if (sTime !== timeStr) continue;
+
     const fireKey = `${dateKey}_${s.id}`;
     if (firedToday[fireKey]) continue;
 
@@ -93,7 +100,7 @@ function check() {
 
 function startChecker(intervalMs) {
   setInterval(check, intervalMs || 30000);
-  check();
+  setTimeout(check, 1000);
 }
 
 module.exports = { init, getAll, add, remove, update, startChecker };
