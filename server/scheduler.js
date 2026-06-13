@@ -7,7 +7,7 @@ let schedules = [];
 let nextId = 0;
 let fireFn = null;
 let broadcastFn = null;
-const firedThisMinute = {};
+const firedToday = {};
 
 function load() {
   try {
@@ -76,14 +76,16 @@ function check() {
   const now = new Date();
   const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   const dayBit = 1 << now.getDay();
+  const dateKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
 
   for (const s of schedules) {
     if (!s.active) continue;
     if ((s.dayMask & dayBit) === 0) continue;
     if (s.time !== timeStr) continue;
-    if (firedThisMinute[s.id] === timeStr) continue;
+    const fireKey = `${dateKey}_${s.id}`;
+    if (firedToday[fireKey]) continue;
 
-    firedThisMinute[s.id] = timeStr;
+    firedToday[fireKey] = true;
     const ok = fireFn(s.actionId, s.acState || null);
     console.log(`[Scheduler] Fired "${s.actionName}" at ${timeStr} — ${ok ? 'sent' : 'ESP offline'}`);
   }
